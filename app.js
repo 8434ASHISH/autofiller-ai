@@ -1,37 +1,61 @@
-let currentBase64 = null;
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 
-document.getElementById('imageInput').addEventListener('change', function(e) {
-    const reader = new FileReader();
-    reader.onload = function() {
-        currentBase64 = reader.result.split(',')[1];
-        const img = document.getElementById('displayImg');
-        img.src = reader.result;
-        img.classList.remove('hidden');
-        document.getElementById('waitText').classList.add('hidden');
-    }
-    reader.readAsDataURL(e.target.files[0]);
-});
-
-async function analyze(tone) {
-    if (!currentBase64) return alert("Pehle photo upload karo bhai!");
-    
-    const container = document.getElementById('previewContainer');
-    container.classList.add('active-scan');
-    
-    const response = await fetch('http://localhost:3000/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: currentBase64, tone: tone })
-    });
-
-    const data = await response.json();
-    container.classList.remove('active-scan');
-    
-    const output = document.getElementById('outputCard');
-    output.classList.remove('hidden');
-    document.getElementById('responseText').innerText = data.text;
-    
-    // Auto-Speak for Blind Users
-    const speech = new SpeechSynthesisUtterance(data.text);
-    window.speechSynthesis.speak(speech);
+import {
+ getAuth,
+ GoogleAuthProvider,
+ signInWithPopup
 }
+from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+
+const firebaseConfig = {
+
+  apiKey: "YOUR_API_KEY",
+
+  authDomain: "studio-9xeng.firebaseapp.com",
+
+  projectId: "studio-9xeng",
+
+  storageBucket: "studio-9xeng.firebasestorage.app",
+
+  messagingSenderId: "885752995722",
+
+  appId: "1:885752995722:web:e15acce093a3cdbd1bb273"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const provider = new GoogleAuthProvider();
+
+document
+.getElementById("loginBtn")
+.addEventListener("click", async ()=>{
+
+ try{
+
+   const result =
+   await signInWithPopup(auth, provider);
+
+   const user = result.user;
+
+   document.getElementById("userInfo")
+   .innerText =
+   "Logged in: " + user.email;
+
+   localStorage.setItem(
+     "autofilerUser",
+     JSON.stringify({
+       email:user.email
+     })
+   );
+
+ }catch(error){
+
+   console.log(error);
+
+ }
+
+});
